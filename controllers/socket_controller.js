@@ -6,7 +6,7 @@ const debug = require("debug")("battleships:socket_controller");
 let io = null; // socket.io server instance
 
 /**
- * Handle a user disconnecting
+ * Handle a player disconnecting
  *
  */
 const handleDisconnect = function () {
@@ -23,6 +23,6 @@ module.exports = function (socket, _io) {
 
 	debug(`Client ${socket.id} connected`);
 
-	// handle user disconnect
+	// handle player disconnect
 	socket.on("disconnect", handleDisconnect);
 };
