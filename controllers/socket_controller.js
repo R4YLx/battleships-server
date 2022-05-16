@@ -25,4 +25,10 @@ module.exports = function (socket, _io) {
 
 	// handle player disconnect
 	socket.on("disconnect", handleDisconnect);
+
+	// handle username
+	socket.on("player:username", (username) => {
+		socket.username = username;
+		debug(`${username} connected with id ${socket.id}`);
+	});
 };
