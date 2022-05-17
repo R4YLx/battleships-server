@@ -11,20 +11,20 @@ const players = [];
  * Handle a player joined
  *
  */
+
 const handlePlayerJoined = function (username) {
 	debug(`${username} connected with id ${this.id} wants to join`);
 
 	const player = {
 		id: this.id,
 		username: username,
-		ready: false,
-		ships: {},
 	};
-
+	players[this.id] = username;
 	players.push(player);
 
-	console.log(players);
+	console.log(player.username);
 
+	this.broadcast.emit('username', player.username);
 	// Let new player join a room.
 
 	// If there's more than 2 players in same room emit to waiting page
