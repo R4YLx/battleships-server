@@ -11,11 +11,11 @@ const players = [];
  * Handle a player joined
  *
  */
-const handleUserJoined = function (username) {
+const handlePlayerJoined = function () {
 	debug(`${username} connected with id ${this.id} wants to join`);
 
-	player = {
-		socketId: this.id,
+	const player = {
+		id: this.id,
 		username: username,
 		ready: false,
 		ships: {},
@@ -24,7 +24,26 @@ const handleUserJoined = function (username) {
 	players.push(player);
 
 	console.log(players);
+
+	// Let new player join a room.
+
+	// If there's more than 2 players in same room emit to waiting page
 };
+
+/**
+ * Handle when player is ready
+ *
+ */
+
+/**
+ * Create battle board and emit with ship locations
+ *
+ */
+
+/**
+ * Handle hit and miss
+ *
+ */
 
 /**
  * Handle a player disconnecting
@@ -48,5 +67,5 @@ module.exports = function (socket, _io) {
 	socket.on("disconnect", handleDisconnect);
 
 	// handle username
-	socket.on("player:username", handleUserJoined);
+	socket.on("player:username", handlePlayerJoined);
 };
