@@ -6,44 +6,34 @@ const debug = require('debug')('battleships:socket_controller');
 let io = null; // socket.io server instance
 
 const players = [];
+const room = [];
 
 /**
  * Handle a player joined
  *
  */
-
 const handlePlayerJoined = function (username) {
 	debug(`${username} connected with id ${this.id} wants to join`);
+	console.log('How many players in the begining', players);
+
+	if (players.length > 1) {
+		console.log('Room is full');
+		this.emit('game:full', true, (playersArray) => {
+			playersArray = players;
+		});
+		return;
+	}
 
 	const player = {
 		id: this.id,
 		username: username,
 	};
-	players[this.id] = username;
+
 	players.push(player);
 
-	console.log(player.username);
-
+	// Sending oppponent name
 	this.broadcast.emit('username', player.username);
-	// Let new player join a room.
-
-	// If there's more than 2 players in same room emit to waiting page
 };
-
-/**
- * Handle when player is ready
- *
- */
-
-/**
- * Create battle board and emit with ship locations
- *
- */
-
-/**
- * Handle hit and miss
- *
- */
 
 /**
  * Handle a player disconnecting
@@ -51,6 +41,19 @@ const handlePlayerJoined = function (username) {
  */
 const handleDisconnect = function () {
 	debug(`Client ${this.id} disconnected :(`);
+
+	const playerLeaving = players.find((x) => x.id === this.id);
+
+	if (playerLeaving) {
+		const leavingPlayerName = players.find((x) => x.id === this.id).username;
+
+		if (leavingPlayerName) {
+			const playerIndex = players.findIndex((x) => x.id === this.id);
+			players.splice(playerIndex, 1);
+
+			this.broadcast.emit('player:disconnected', true);
+		}
+	}
 };
 
 /**
