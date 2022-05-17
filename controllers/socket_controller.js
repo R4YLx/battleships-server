@@ -42,13 +42,15 @@ const handlePlayerJoined = function (username) {
 const handleDisconnect = function () {
 	debug(`Client ${this.id} disconnected :(`);
 
-	const playerLeaving = players.find((x) => x.id === this.id);
+	const playerLeaving = players.find((player) => player.id === this.id);
 
 	if (playerLeaving) {
-		const leavingPlayerName = players.find((x) => x.id === this.id).username;
+		const leavingPlayerName = players.find(
+			(player) => player.id === this.id
+		).username;
 
 		if (leavingPlayerName) {
-			const playerIndex = players.findIndex((x) => x.id === this.id);
+			const playerIndex = players.findIndex((player) => player.id === this.id);
 			players.splice(playerIndex, 1);
 
 			this.broadcast.emit('player:disconnected', true);
