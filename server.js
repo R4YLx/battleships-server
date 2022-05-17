@@ -9,7 +9,7 @@ require('dotenv').config();
 const debug = require('debug')('battleships:server');
 const http = require('http');
 const socketio = require('socket.io');
-const { instrument } = require("@socket.io/admin-ui");
+const { instrument } = require('@socket.io/admin-ui');
 const socket_controller = require('./controllers/socket_controller');
 
 /**
@@ -25,7 +25,7 @@ const io = new socketio.Server(server, {
 	cors: {
 		origin: '*',
 		credentials: true,
-	}
+	},
 });
 
 /**
@@ -38,7 +38,7 @@ instrument(io, {
 /**
  * Handle incoming connections
  */
-io.on('connection', socket => {
+io.on('connection', (socket) => {
 	socket_controller(socket, io);
 });
 

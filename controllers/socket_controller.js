@@ -2,7 +2,7 @@
  * Socket Controller
  */
 
-const debug = require("debug")("battleships:socket_controller");
+const debug = require('debug')('battleships:socket_controller');
 let io = null; // socket.io server instance
 
 const players = [];
@@ -11,7 +11,7 @@ const players = [];
  * Handle a player joined
  *
  */
-const handlePlayerJoined = function () {
+const handlePlayerJoined = function (username) {
 	debug(`${username} connected with id ${this.id} wants to join`);
 
 	const player = {
@@ -64,8 +64,8 @@ module.exports = function (socket, _io) {
 	debug(`Client ${socket.id} connected`);
 
 	// handle player disconnect
-	socket.on("disconnect", handleDisconnect);
+	socket.on('disconnect', handleDisconnect);
 
 	// handle username
-	socket.on("player:username", handlePlayerJoined);
+	socket.on('player:username', handlePlayerJoined);
 };
