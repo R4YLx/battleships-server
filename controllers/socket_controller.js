@@ -13,8 +13,8 @@ const players = [];
  */
 const handlePlayerJoined = function (username) {
 	debug(`${username} connected with id ${this.id} wants to join`);
-	console.log('How many players in the begining', players);
 
+	// check if room is full
 	if (players.length > 1) {
 		console.log('Room is full');
 		this.emit('game:full', true, (playersArray) => {
@@ -23,6 +23,7 @@ const handlePlayerJoined = function (username) {
 		return;
 	}
 
+	// creating player profile
 	const player = {
 		id: this.id,
 		username: username,
@@ -41,8 +42,10 @@ const handlePlayerJoined = function (username) {
 const handleDisconnect = function () {
 	debug(`Client ${this.id} disconnected :(`);
 
+	// find player index disconnecting
 	const playerIndex = players.findIndex((player) => player.id === this.id);
 
+	// remove disconnecting player from players array
 	players.splice(playerIndex, 1);
 
 	this.broadcast.emit('player:disconnected', true);
