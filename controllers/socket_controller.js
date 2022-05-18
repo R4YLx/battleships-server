@@ -2,7 +2,7 @@
  * Socket Controller
  */
 
-const debug = require('debug')('battleships:socket_controller');
+const debug = require("debug")("battleships:socket_controller");
 let io = null; // socket.io server instance
 
 const players = [];
@@ -16,8 +16,8 @@ const handlePlayerJoined = function (username) {
 
 	// check if room is full
 	if (players.length > 1) {
-		console.log('Room is full');
-		this.emit('game:full', true, (playersArray) => {
+		console.log("Room is full");
+		this.emit("game:full", true, (playersArray) => {
 			playersArray = players;
 		});
 		return;
@@ -32,7 +32,7 @@ const handlePlayerJoined = function (username) {
 	players.push(player);
 
 	// Sending oppponent name
-	this.broadcast.emit('username', player.username);
+	this.broadcast.emit("username", player.username);
 };
 
 /**
@@ -48,7 +48,7 @@ const handleDisconnect = function () {
 	// remove disconnecting player from players array
 	players.splice(playerIndex, 1);
 
-	this.broadcast.emit('player:disconnected', true);
+	this.broadcast.emit("player:disconnected", true);
 };
 
 /**
@@ -62,8 +62,8 @@ module.exports = function (socket, _io) {
 	debug(`Client ${socket.id} connected`);
 
 	// handle player disconnect
-	socket.on('disconnect', handleDisconnect);
+	socket.on("disconnect", handleDisconnect);
 
 	// handle username
-	socket.on('player:username', handlePlayerJoined);
+	socket.on("player:username", handlePlayerJoined);
 };
