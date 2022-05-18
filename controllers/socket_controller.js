@@ -6,7 +6,6 @@ const debug = require('debug')('battleships:socket_controller');
 let io = null; // socket.io server instance
 
 const players = [];
-const room = [];
 
 /**
  * Handle a player joined
