@@ -11,39 +11,29 @@ const players = [];
  * Handle a player joined
  *
  */
-
 const handlePlayerJoined = function (username) {
 	debug(`${username} connected with id ${this.id} wants to join`);
 
+	// check if room is full
+	if (players.length > 1) {
+		console.log('Room is full');
+		this.emit('game:full', true, (playersArray) => {
+			playersArray = players;
+		});
+		return;
+	}
+
+	// creating player profile
 	const player = {
 		id: this.id,
 		username: username,
 	};
-	players[this.id] = username;
+
 	players.push(player);
 
-	console.log(player.username);
-
+	// Sending oppponent name
 	this.broadcast.emit('username', player.username);
-	// Let new player join a room.
-
-	// If there's more than 2 players in same room emit to waiting page
 };
-
-/**
- * Handle when player is ready
- *
- */
-
-/**
- * Create battle board and emit with ship locations
- *
- */
-
-/**
- * Handle hit and miss
- *
- */
 
 /**
  * Handle a player disconnecting
@@ -51,6 +41,14 @@ const handlePlayerJoined = function (username) {
  */
 const handleDisconnect = function () {
 	debug(`Client ${this.id} disconnected :(`);
+
+	// find player index disconnecting
+	const playerIndex = players.findIndex((player) => player.id === this.id);
+
+	// remove disconnecting player from players array
+	players.splice(playerIndex, 1);
+
+	this.broadcast.emit('player:disconnected', true);
 };
 
 /**
