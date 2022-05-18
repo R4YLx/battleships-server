@@ -5,34 +5,43 @@
 const debug = require("debug")("battleships:socket_controller");
 let io = null; // socket.io server instance
 
-const players = [];
+let players = [];
 
 /**
  * Handle a player joined
  *
  */
 const handlePlayerJoined = function (username) {
+	console.log("How many players are there now", players);
 	debug(`${username} connected with id ${this.id} wants to join`);
 
-	// check if room is full
-	if (players.length > 1) {
+	if (players.length <= 1) {
+		// creating player profile
+		const player = {
+			id: this.id,
+			username: username,
+		};
+
+		players.push(player);
+		console.log("how many players inside IF?", players);
+
+		// Sending oppponent name
+		this.broadcast.emit("username", player.username);
+	} else {
+		// if room is full
 		console.log("Room is full");
+		console.log(
+			"This room is full but how many are in this players array?",
+			players
+		);
+		// delete this.id;
 		this.emit("game:full", true, (playersArray) => {
 			playersArray = players;
 		});
+
+		delete this.id;
 		return;
 	}
-
-	// creating player profile
-	const player = {
-		id: this.id,
-		username: username,
-	};
-
-	players.push(player);
-
-	// Sending oppponent name
-	this.broadcast.emit("username", player.username);
 };
 
 /**
@@ -42,13 +51,31 @@ const handlePlayerJoined = function (username) {
 const handleDisconnect = function () {
 	debug(`Client ${this.id} disconnected :(`);
 
-	// find player index disconnecting
-	const playerIndex = players.findIndex((player) => player.id === this.id);
+	if (this.id) {
+		this.broadcast.emit("player:disconnected", true);
+	}
 
-	// remove disconnecting player from players array
-	players.splice(playerIndex, 1);
+	delete this.id;
 
-	this.broadcast.emit("player:disconnected", true);
+	if (players.length === 1) {
+		players = [];
+	}
+};
+
+/**
+ * Handle hit
+ *
+ */
+const handleHit = function (target) {
+	debug(`Player shot at ${target} and hit`);
+};
+
+/**
+ * Handle miss
+ *
+ */
+const handleMiss = function (target) {
+	debug(`Player shot at ${target} and missed`);
 };
 
 /**
@@ -66,4 +93,10 @@ module.exports = function (socket, _io) {
 
 	// handle username
 	socket.on("player:username", handlePlayerJoined);
+
+	// Handle hit
+	socket.on("player:hit", handleHit);
+
+	// Handle miss
+	socket.on("player:miss", handleMiss);
 };
