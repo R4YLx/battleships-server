@@ -56,26 +56,26 @@ const handleDisconnect = function () {
 	}
 
 	delete this.id;
+	players = [];
+	// if (players.length === 1) {
 
-	if (players.length === 1) {
-		players = [];
-	}
+	// }
 };
 
 /**
  * Handle hit
  *
  */
-const handleHit = function (target) {
-	debug(`Player shot at ${target} and hit`);
+const handleHit = function (target, username) {
+	debug(`Player ${username} shot at ${target} and hit`);
 };
 
 /**
  * Handle miss
  *
  */
-const handleMiss = function (target) {
-	debug(`Player shot at ${target} and missed`);
+const handleMiss = function (target, username) {
+	debug(`Player ${username} shot at ${target} and missed`);
 };
 
 /**
