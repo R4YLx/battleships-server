@@ -12,7 +12,6 @@ let players = [];
  *
  */
 const handlePlayerJoined = function (username) {
-	console.log("How many players are there now", players);
 	debug(`${username} connected with id ${this.id} wants to join`);
 
 	if (players.length <= 1) {
@@ -23,18 +22,11 @@ const handlePlayerJoined = function (username) {
 		};
 
 		players.push(player);
-		console.log("how many players inside IF?", players);
 
 		// Sending oppponent name
 		this.broadcast.emit("username", player.username);
 	} else {
 		// if room is full
-		console.log("Room is full");
-		console.log(
-			"This room is full but how many are in this players array?",
-			players
-		);
-		// delete this.id;
 		this.emit("game:full", true, (playersArray) => {
 			playersArray = players;
 		});
@@ -66,8 +58,19 @@ const handleDisconnect = function () {
  * Handle hit
  *
  */
-const handleHit = function (target, username) {
-	debug(`Player ${username} shot at ${target} and hit`);
+const handleHit = function (target, username, socketId) {
+	console.log("This should be socket id", socketId);
+
+	console.log("HandleHit players", players);
+
+	// const opponent = players.find((player) => player === !socketId);
+
+	// console.log(`OPPONENT IS ${opponent}`);
+
+	let hit = target.replace("e", "m");
+	console.log(`Enemy clicked on ${target} and on your board it is ${hit}`);
+
+	this.broadcast.emit("player:hit", hit);
 };
 
 /**
@@ -76,6 +79,10 @@ const handleHit = function (target, username) {
  */
 const handleMiss = function (target, username) {
 	debug(`Player ${username} shot at ${target} and missed`);
+	let miss = target.replace("e", "m");
+	console.log(`Enemy clicked on ${target} and on your board it is ${miss}`);
+
+	this.broadcast.emit("player:missed", miss);
 };
 
 /**
@@ -95,8 +102,8 @@ module.exports = function (socket, _io) {
 	socket.on("player:username", handlePlayerJoined);
 
 	// Handle hit
-	socket.on("player:hit", handleHit);
+	socket.on("player:shot-hit", handleHit);
 
 	// Handle miss
-	socket.on("player:miss", handleMiss);
+	socket.on("player:shot-miss", handleMiss);
 };
