@@ -12,19 +12,20 @@ let players = [];
  *
  */
 const handlePlayerJoined = function (username) {
-	debug(`${username} connected with id ${this.id} wants to join`);
+	debug(`${username} with id ${this.id} joined the game `);
 
 	if (players.length <= 1) {
 		// creating player profile
 		const player = {
 			id: this.id,
 			username: username,
+			currentPlayer: "",
 		};
 
 		players.push(player);
 
 		// Sending oppponent name
-		this.broadcast.emit("username", player.username);
+		this.broadcast.emit("player:profile", player);
 	} else {
 		// if room is full
 		this.emit("game:full", true, (playersArray) => {
