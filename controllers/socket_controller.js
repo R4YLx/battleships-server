@@ -60,35 +60,51 @@ const handleDisconnect = function () {
 };
 
 /**
+ * Handle shot fired
+ *
+ */
+const handleShotFired = function (target) {
+	console.log(`User with id: ${this.id} shot on ${target}`);
+	this.broadcast.emit("player:fire", target);
+};
+
+/**
+ * Handle shot reply
+ *
+ */
+const handleShotReply = function (target) {
+	console.log(`Replying shot on ${target}`);
+	this.broadcast.emit("player:fire-reveal", target);
+};
+
+/**
  * Handle hit
  *
  */
-const handleHit = function (target, username, socketId) {
-	console.log("This should be socket id", socketId);
+// const handleHit = function (target) {
+// 	console.log(`User shot on ${target}`);
 
-	console.log("HandleHit players", players);
+// 	// const opponent = players.find((player) => player === !socketId);
 
-	// const opponent = players.find((player) => player === !socketId);
+// 	// console.log(`OPPONENT IS ${opponent}`);
 
-	// console.log(`OPPONENT IS ${opponent}`);
+// 	// let hit = target.replace("e", "m");
+// 	// console.log(`Enemy clicked on ${target} and on your board it is ${hit}`);
 
-	let hit = target.replace("e", "m");
-	console.log(`Enemy clicked on ${target} and on your board it is ${hit}`);
-
-	io.to("game").emit("player:hit", hit);
-};
+// 	// io.to("game").emit("player:hit", hit);
+// };
 
 /**
  * Handle miss
  *
  */
-const handleMiss = function (target, username) {
-	debug(`Player ${username} shot at ${target} and missed`);
-	let miss = target.replace("e", "m");
-	console.log(`Enemy clicked on ${target} and on your board it is ${miss}`);
+// const handleMiss = function (target) {
+// 	console.log(`User shot on ${target}`);
+// 	// let miss = target.replace("e", "m");
+// 	// console.log(`Enemy clicked on ${target} and on your board it is ${miss}`);
 
-	io.to("game").emit("player:missed", miss);
-};
+// 	// io.to("game").emit("player:missed", miss);
+// };
 
 /**
  * Export controller and attach handlers to events
@@ -106,9 +122,15 @@ module.exports = function (socket, _io) {
 	// handle username
 	socket.on("player:joined", handlePlayerJoined);
 
-	// Handle hit
-	socket.on("player:shot-hit", handleHit);
+	// Handle shot fired
+	socket.on("player:shot-fired", handleShotFired);
 
-	// Handle miss
-	socket.on("player:shot-miss", handleMiss);
+	// Handle shot reply
+	socket.on("player:shot-reply", handleShotReply);
+
+	// // Handle hit
+	// socket.on("player:shot-hit", handleHit);
+
+	// // Handle miss
+	// socket.on("player:shot-miss", handleMiss);
 };
