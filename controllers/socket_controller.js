@@ -18,14 +18,19 @@ const handlePlayerJoined = function (username) {
 		// creating player profile
 		const player = {
 			id: this.id,
+			room: "game",
 			username: username,
 			currentPlayer: "",
 		};
 
+		this.join(player.room);
+
 		players.push(player);
 
+		console.log("PLAYERS before emitting:", players);
+
 		// Sending oppponent name
-		this.broadcast.emit("player:profile", player);
+		io.to(player.room).emit("players:profiles", players);
 	} else {
 		// if room is full
 		this.emit("game:full", true, (playersArray) => {
@@ -44,15 +49,14 @@ const handlePlayerJoined = function (username) {
 const handleDisconnect = function () {
 	debug(`Client ${this.id} disconnected :(`);
 
-	if (this.id) {
-		this.broadcast.emit("player:disconnected", true);
-	}
+	const removePlayer = (id) => {
+		const removeIndex = players.findIndex((player) => player.id === id);
 
-	delete this.id;
-	players = [];
-	// if (players.length === 1) {
+		if (removeIndex !== -1) return players.splice(removeIndex, 1)[0];
+	};
 
-	// }
+	const player = removePlayer(this.id);
+	if (player) io.to(player.room).emit("player:disconnected", true);
 };
 
 /**
@@ -100,7 +104,7 @@ module.exports = function (socket, _io) {
 	socket.on("disconnect", handleDisconnect);
 
 	// handle username
-	socket.on("player:username", handlePlayerJoined);
+	socket.on("player:joined", handlePlayerJoined);
 
 	// Handle hit
 	socket.on("player:shot-hit", handleHit);
