@@ -75,7 +75,7 @@ const handleHit = function (target, username, socketId) {
 	let hit = target.replace("e", "m");
 	console.log(`Enemy clicked on ${target} and on your board it is ${hit}`);
 
-	this.broadcast.emit("player:hit", hit);
+	io.to("game").emit("player:hit", hit);
 };
 
 /**
@@ -87,7 +87,7 @@ const handleMiss = function (target, username) {
 	let miss = target.replace("e", "m");
 	console.log(`Enemy clicked on ${target} and on your board it is ${miss}`);
 
-	this.broadcast.emit("player:missed", miss);
+	// io.to("game").emit("player:missed", miss);
 };
 
 /**
