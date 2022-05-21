@@ -87,7 +87,7 @@ const handleMiss = function (target, username) {
 	let miss = target.replace("e", "m");
 	console.log(`Enemy clicked on ${target} and on your board it is ${miss}`);
 
-	// io.to("game").emit("player:missed", miss);
+	io.to("game").emit("player:missed", miss);
 };
 
 /**
