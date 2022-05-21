@@ -5,7 +5,23 @@
 const debug = require("debug")("battleships:socket_controller");
 let io = null; // socket.io server instance
 
-let players = [];
+let players = [null, null];
+
+// Find an available player number
+//
+
+const handlePlayerNumber = function () {
+	let playerIndex = -1;
+	for (const i in players) {
+		if (players[i] === null) {
+			playerIndex = i;
+			break;
+		}
+	}
+
+	// Ignore player 3
+	if (playerIndex === -1) return;
+};
 
 /**
  * Handle a player joined
@@ -94,6 +110,9 @@ module.exports = function (socket, _io) {
 	io = _io;
 
 	debug(`Client ${socket.id} connected`);
+
+	socket.emit("player:number", handlePlayerNumber);
+	debug(`Player ${playerIndex} has connected`);
 
 	// handle player disconnect
 	socket.on("disconnect", handleDisconnect);
