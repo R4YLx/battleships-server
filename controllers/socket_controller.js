@@ -6,7 +6,8 @@ const debug = require("debug")("battleships:socket_controller");
 let io = null; // socket.io server instance
 
 let players = [];
-
+const playerOneShips = ["91", "92", "93", "94"];
+const playerTwoShips = ["1", "2", "3", "4"];
 /**
  * Handle a player joined
  *
@@ -14,23 +15,37 @@ let players = [];
 const handlePlayerJoined = function (username) {
 	debug(`${username} with id ${this.id} joined the game `);
 
-	if (players.length <= 1) {
-		// creating player profile
-		const player = {
+	if (players.length === 0) {
+		const playerOne = {
 			id: this.id,
 			room: "game",
 			username: username,
 			currentPlayer: "",
 		};
 
-		this.join(player.room);
+		this.join(playerOne.room);
 
-		players.push(player);
-
-		console.log("PLAYERS before emitting:", players);
+		players.push(playerOne);
 
 		// Sending oppponent name
-		io.to(player.room).emit("players:profiles", players);
+		io.to(playerOne.room).emit("players:profiles", players);
+	} else if (players.length <= 1) {
+		// creating player profile
+		const playerTwo = {
+			id: this.id,
+			room: "game",
+			username: username,
+			currentPlayer: "",
+		};
+
+		this.join(playerTwo.room);
+
+		players.push(playerTwo);
+
+		debug("PLAYERS before emitting:", players);
+
+		// Sending oppponent name
+		io.to(playerTwo.room).emit("players:profiles", players);
 	} else {
 		// if room is full
 		this.emit("game:full", true, (playersArray) => {
@@ -64,8 +79,23 @@ const handleDisconnect = function () {
  *
  */
 const handleShotFired = function (target) {
-	console.log(`User with id: ${this.id} shot on ${target}`);
-	this.broadcast.emit("player:fire", target);
+	debug(`User with id: ${this.id} shot on ${target}`);
+
+	if (players[0].id === this.id) {
+		const hit = playerOneShips.find((coord) => coord === target);
+		if (hit) {
+			this.broadcast.emit("player:hit", target, this.username);
+		} else {
+			this.broadcast.emit("player:miss", target, this.username);
+		}
+	} else {
+		const hit = playerTwoShips.find((coord) => coord === target);
+		if (hit) {
+			this.broadcast.emit("player:hit", target, this.username);
+		} else {
+			this.broadcast.emit("player:miss", target, this.username);
+		}
+	}
 };
 
 /**
@@ -77,39 +107,6 @@ const handleShotReply = function (target) {
 	this.broadcast.emit("player:fire-reveal", target);
 };
 
-/**
- * Handle hit
- *
- */
-// const handleHit = function (target) {
-// 	console.log(`User shot on ${target}`);
-
-// 	// const opponent = players.find((player) => player === !socketId);
-
-// 	// console.log(`OPPONENT IS ${opponent}`);
-
-// 	// let hit = target.replace("e", "m");
-// 	// console.log(`Enemy clicked on ${target} and on your board it is ${hit}`);
-
-// 	// io.to("game").emit("player:hit", hit);
-// };
-
-/**
- * Handle miss
- *
- */
-// const handleMiss = function (target) {
-// 	console.log(`User shot on ${target}`);
-// 	// let miss = target.replace("e", "m");
-// 	// console.log(`Enemy clicked on ${target} and on your board it is ${miss}`);
-
-// 	// io.to("game").emit("player:missed", miss);
-// };
-
-/**
- * Export controller and attach handlers to events
- *
- */
 module.exports = function (socket, _io) {
 	// save a reference to the socket.io server instance
 	io = _io;
@@ -127,10 +124,4 @@ module.exports = function (socket, _io) {
 
 	// Handle shot reply
 	socket.on("player:shot-reply", handleShotReply);
-
-	// // Handle hit
-	// socket.on("player:shot-hit", handleHit);
-
-	// // Handle miss
-	// socket.on("player:shot-miss", handleMiss);
 };
