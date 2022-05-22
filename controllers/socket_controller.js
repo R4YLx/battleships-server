@@ -2,37 +2,45 @@
  * Socket Controller
  */
 
-const debug = require('debug')('battleships:socket_controller');
+const debug = require("debug")("battleships:socket_controller");
 let io = null; // socket.io server instance
 
-const players = [];
+let players = [];
+const playerOneShips = ["1", "2", "3", "4"];
+const playerTwoShips = ["91", "92", "93", "94"];
 
 /**
  * Handle a player joined
  *
  */
 const handlePlayerJoined = function (username) {
-	debug(`${username} connected with id ${this.id} wants to join`);
+	debug(`${username} with id ${this.id} joined the game `);
 
-	// check if room is full
-	if (players.length > 1) {
-		console.log('Room is full');
-		this.emit('game:full', true, (playersArray) => {
+	if (players.length <= 1) {
+		// creating player profile
+		const player = {
+			id: this.id,
+			room: "game",
+			username: username,
+		};
+
+		this.join(player.room);
+
+		players.push(player);
+
+		console.log("PLAYERS before emitting:", players);
+
+		// Sending oppponent name
+		io.to(player.room).emit("players:profiles", players);
+	} else {
+		// if room is full
+		this.emit("game:full", true, (playersArray) => {
 			playersArray = players;
 		});
+
+		delete this.id;
 		return;
 	}
-
-	// creating player profile
-	const player = {
-		id: this.id,
-		username: username,
-	};
-
-	players.push(player);
-
-	// Sending oppponent name
-	this.broadcast.emit('username', player.username);
 };
 
 /**
@@ -42,13 +50,36 @@ const handlePlayerJoined = function (username) {
 const handleDisconnect = function () {
 	debug(`Client ${this.id} disconnected :(`);
 
-	// find player index disconnecting
-	const playerIndex = players.findIndex((player) => player.id === this.id);
+	const removePlayer = (id) => {
+		const removeIndex = players.findIndex((player) => player.id === id);
 
-	// remove disconnecting player from players array
-	players.splice(playerIndex, 1);
+		if (removeIndex !== -1) return players.splice(removeIndex, 1)[0];
+	};
 
-	this.broadcast.emit('player:disconnected', true);
+	const player = removePlayer(this.id);
+	if (player) io.to(player.room).emit("player:disconnected", true);
+};
+
+/**
+ * Handle shot fired
+ *
+ */
+const handleShotFired = function (target) {
+	if (players[0].id === this.id) {
+		const hit = playerTwoShips.find((coord) => coord === target);
+		if (hit) {
+			this.emit("player:hit", target);
+		} else {
+			this.emit("player:miss", target);
+		}
+	} else {
+		const hit = playerOneShips.find((coord) => coord === target);
+		if (hit) {
+			this.emit("player:hit", target);
+		} else {
+			this.emit("player:miss", target);
+		}
+	}
 };
 
 /**
@@ -62,8 +93,11 @@ module.exports = function (socket, _io) {
 	debug(`Client ${socket.id} connected`);
 
 	// handle player disconnect
-	socket.on('disconnect', handleDisconnect);
+	socket.on("disconnect", handleDisconnect);
 
 	// handle username
-	socket.on('player:username', handlePlayerJoined);
+	socket.on("player:joined", handlePlayerJoined);
+
+	// Handle shot fired
+	socket.on("player:shot-fired", handleShotFired);
 };
