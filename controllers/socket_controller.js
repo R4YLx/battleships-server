@@ -16,22 +16,36 @@ const playerTwoShips = ["91", "92", "93", "94"];
 const handlePlayerJoined = function (username) {
 	debug(`${username} with id ${this.id} joined the game `);
 
-	if (players.length <= 1) {
+	if (players.length === 0) {
+		const playerOne = {
+			id: this.id,
+			room: "game",
+			username: username,
+			currentPlayer: "",
+		};
+
+		this.join(playerOne.room);
+
+		players.push(playerOne);
+
+		// Sending oppponent name
+		io.to(playerOne.room).emit("players:profiles", players);
+	} else if (players.length <= 1) {
 		// creating player profile
-		const player = {
+		const playerTwo = {
 			id: this.id,
 			room: "game",
 			username: username,
 		};
 
-		this.join(player.room);
+		this.join(playerTwo.room);
 
-		players.push(player);
+		players.push(playerTwo);
 
-		console.log("PLAYERS before emitting:", players);
+		debug("PLAYERS before emitting:", players);
 
 		// Sending oppponent name
-		io.to(player.room).emit("players:profiles", players);
+		io.to(playerTwo.room).emit("players:profiles", players);
 	} else {
 		// if room is full
 		this.emit("game:full", true, (playersArray) => {
