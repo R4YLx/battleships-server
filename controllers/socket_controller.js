@@ -6,8 +6,8 @@ const debug = require("debug")("battleships:socket_controller");
 let io = null; // socket.io server instance
 
 let players = [];
-const playerOneShips = ["91", "92", "93", "94"];
-const playerTwoShips = ["1", "2", "3", "4"];
+const playerOneShips = ["1", "2", "3", "4"];
+const playerTwoShips = ["91", "92", "93", "94"];
 /**
  * Handle a player joined
  *
@@ -82,14 +82,14 @@ const handleShotFired = function (target) {
 	debug(`User with id: ${this.id} shot on ${target}`);
 
 	if (players[0].id === this.id) {
-		const hit = playerOneShips.find((coord) => coord === target);
+		const hit = playerTwoShips.find((coord) => coord === target);
 		if (hit) {
 			this.broadcast.emit("player:hit", target, this.username);
 		} else {
 			this.broadcast.emit("player:miss", target, this.username);
 		}
 	} else {
-		const hit = playerTwoShips.find((coord) => coord === target);
+		const hit = playerOneShips.find((coord) => coord === target);
 		if (hit) {
 			this.broadcast.emit("player:hit", target, this.username);
 		} else {
