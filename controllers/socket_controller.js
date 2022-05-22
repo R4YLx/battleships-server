@@ -6,8 +6,9 @@ const debug = require("debug")("battleships:socket_controller");
 let io = null; // socket.io server instance
 
 let players = [];
-const playerOneShips = ["91", "92", "93", "94"];
-const playerTwoShips = ["1", "2", "3", "4"];
+const playerOneShips = ["1", "2", "3", "4"];
+const playerTwoShips = ["91", "92", "93", "94"];
+
 /**
  * Handle a player joined
  *
@@ -35,7 +36,6 @@ const handlePlayerJoined = function (username) {
 			id: this.id,
 			room: "game",
 			username: username,
-			currentPlayer: "",
 		};
 
 		this.join(playerTwo.room);
@@ -79,34 +79,27 @@ const handleDisconnect = function () {
  *
  */
 const handleShotFired = function (target) {
-	debug(`User with id: ${this.id} shot on ${target}`);
-
 	if (players[0].id === this.id) {
-		const hit = playerOneShips.find((coord) => coord === target);
-		if (hit) {
-			this.broadcast.emit("player:hit", target, this.username);
-		} else {
-			this.broadcast.emit("player:miss", target, this.username);
-		}
-	} else {
 		const hit = playerTwoShips.find((coord) => coord === target);
 		if (hit) {
-			this.broadcast.emit("player:hit", target, this.username);
+			this.emit("player:hit", target);
 		} else {
-			this.broadcast.emit("player:miss", target, this.username);
+			this.emit("player:miss", target);
+		}
+	} else {
+		const hit = playerOneShips.find((coord) => coord === target);
+		if (hit) {
+			this.emit("player:hit", target);
+		} else {
+			this.emit("player:miss", target);
 		}
 	}
 };
 
 /**
- * Handle shot reply
+ * Export controller and attach handlers to events
  *
  */
-const handleShotReply = function (target) {
-	console.log(`Replying shot on ${target}`);
-	this.broadcast.emit("player:fire-reveal", target);
-};
-
 module.exports = function (socket, _io) {
 	// save a reference to the socket.io server instance
 	io = _io;
@@ -121,7 +114,4 @@ module.exports = function (socket, _io) {
 
 	// Handle shot fired
 	socket.on("player:shot-fired", handleShotFired);
-
-	// Handle shot reply
-	socket.on("player:shot-reply", handleShotReply);
 };
