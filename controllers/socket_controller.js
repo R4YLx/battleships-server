@@ -6,6 +6,8 @@ const debug = require("debug")("battleships:socket_controller");
 let io = null; // socket.io server instance
 
 let players = [];
+const playerOneShips = ["1", "2", "3", "4"];
+const playerTwoShips = ["91", "92", "93", "94"];
 
 /**
  * Handle a player joined
@@ -20,7 +22,6 @@ const handlePlayerJoined = function (username) {
 			id: this.id,
 			room: "game",
 			username: username,
-			currentPlayer: "",
 		};
 
 		this.join(player.room);
@@ -64,47 +65,22 @@ const handleDisconnect = function () {
  *
  */
 const handleShotFired = function (target) {
-	console.log(`User with id: ${this.id} shot on ${target}`);
-	this.broadcast.emit("player:fire", target);
+	if (players[0].id === this.id) {
+		const hit = playerTwoShips.find((coord) => coord === target);
+		if (hit) {
+			this.emit("player:hit", target);
+		} else {
+			this.emit("player:miss", target);
+		}
+	} else {
+		const hit = playerOneShips.find((coord) => coord === target);
+		if (hit) {
+			this.emit("player:hit", target);
+		} else {
+			this.emit("player:miss", target);
+		}
+	}
 };
-
-/**
- * Handle shot reply
- *
- */
-const handleShotReply = function (target) {
-	console.log(`Replying shot on ${target}`);
-	this.broadcast.emit("player:fire-reveal", target);
-};
-
-/**
- * Handle hit
- *
- */
-// const handleHit = function (target) {
-// 	console.log(`User shot on ${target}`);
-
-// 	// const opponent = players.find((player) => player === !socketId);
-
-// 	// console.log(`OPPONENT IS ${opponent}`);
-
-// 	// let hit = target.replace("e", "m");
-// 	// console.log(`Enemy clicked on ${target} and on your board it is ${hit}`);
-
-// 	// io.to("game").emit("player:hit", hit);
-// };
-
-/**
- * Handle miss
- *
- */
-// const handleMiss = function (target) {
-// 	console.log(`User shot on ${target}`);
-// 	// let miss = target.replace("e", "m");
-// 	// console.log(`Enemy clicked on ${target} and on your board it is ${miss}`);
-
-// 	// io.to("game").emit("player:missed", miss);
-// };
 
 /**
  * Export controller and attach handlers to events
@@ -124,13 +100,4 @@ module.exports = function (socket, _io) {
 
 	// Handle shot fired
 	socket.on("player:shot-fired", handleShotFired);
-
-	// Handle shot reply
-	socket.on("player:shot-reply", handleShotReply);
-
-	// // Handle hit
-	// socket.on("player:shot-hit", handleHit);
-
-	// // Handle miss
-	// socket.on("player:shot-miss", handleMiss);
 };
