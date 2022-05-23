@@ -82,16 +82,16 @@ const handleShotFired = function (target) {
 	if (players[0].id === this.id) {
 		const hit = playerTwoShips.find((coord) => coord === target);
 		if (hit) {
-			this.emit("player:hit", target);
+			this.broadcast.emit("player:hit", target);
 		} else {
-			this.emit("player:miss", target);
+			this.broadcast.emit("player:miss", target);
 		}
 	} else {
 		const hit = playerOneShips.find((coord) => coord === target);
 		if (hit) {
-			this.emit("player:hit", target);
+			this.broadcast.emit("player:hit", target);
 		} else {
-			this.emit("player:miss", target);
+			this.broadcast.emit("player:miss", target);
 		}
 	}
 };
