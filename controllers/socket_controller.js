@@ -19,14 +19,12 @@ const handlePlayerJoined = function (username) {
 			id: this.id,
 			room: "game",
 			username: username,
-			currentPlayer: "",
 		};
 
 		this.join(playerOne.room);
 
 		players.push(playerOne);
 
-		// Sending oppponent name
 		io.to(playerOne.room).emit("players:profiles", players);
 	} else if (players.length <= 1) {
 		// creating player profile
@@ -42,7 +40,6 @@ const handlePlayerJoined = function (username) {
 
 		debug("PLAYERS before emitting:", players);
 
-		// Sending oppponent name
 		io.to(playerTwo.room).emit("players:profiles", players);
 	} else {
 		// if room is full
