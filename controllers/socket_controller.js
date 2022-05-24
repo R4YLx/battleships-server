@@ -6,8 +6,6 @@ const debug = require("debug")("battleships:socket_controller");
 let io = null; // socket.io server instance
 
 let players = [];
-const playerOneShips = ["1", "2", "3", "4"];
-const playerTwoShips = ["91", "92", "93", "94"];
 
 /**
  * Handle a player joined
