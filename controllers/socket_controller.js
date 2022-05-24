@@ -19,6 +19,7 @@ const handlePlayerJoined = function (username) {
 			id: this.id,
 			room: "game",
 			username: username,
+			currentPlayer: true,
 		};
 
 		this.join(playerOne.room);
@@ -32,6 +33,7 @@ const handlePlayerJoined = function (username) {
 			id: this.id,
 			room: "game",
 			username: username,
+			currentPlayer: false,
 		};
 
 		this.join(playerTwo.room);
