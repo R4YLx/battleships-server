@@ -79,21 +79,17 @@ const handleDisconnect = function () {
  *
  */
 const handleShotFired = function (target) {
-	if (players[0].id === this.id) {
-		const hit = playerTwoShips.find((coord) => coord === target);
-		if (hit) {
-			this.broadcast.emit("player:hit", target);
-		} else {
-			this.broadcast.emit("player:miss", target);
-		}
-	} else {
-		const hit = playerOneShips.find((coord) => coord === target);
-		if (hit) {
-			this.broadcast.emit("player:hit", target);
-		} else {
-			this.broadcast.emit("player:miss", target);
-		}
-	}
+	console.log(`User shot at ${target}`);
+	this.broadcast.emit("player:fire", target);
+};
+
+/**
+ * Handle shot reply
+ *
+ */
+const handleShotReply = function (id, boolean) {
+	console.log(`Shot replied at ${id} and it's ${boolean}`);
+	this.broadcast.emit("player:shot-received", id, boolean);
 };
 
 /**
@@ -114,4 +110,7 @@ module.exports = function (socket, _io) {
 
 	// Handle shot fired
 	socket.on("player:shot-fired", handleShotFired);
+
+	// Handle shot replied
+	socket.on("player:shot-reply", handleShotReply);
 };
