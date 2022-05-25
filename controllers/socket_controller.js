@@ -19,7 +19,7 @@ const handlePlayerJoined = function (username) {
 			id: this.id,
 			room: "game",
 			username: username,
-			currentPlayer: true,
+			currentPlayer: null,
 		};
 
 		this.join(playerOne.room);
@@ -33,12 +33,15 @@ const handlePlayerJoined = function (username) {
 			id: this.id,
 			room: "game",
 			username: username,
-			currentPlayer: false,
+			currentPlayer: null,
 		};
 
 		this.join(playerTwo.room);
 
 		players.push(playerTwo);
+
+		const startingPlayer = players[Math.floor(Math.random() * players.length)];
+		startingPlayer.currentPlayer = "first";
 
 		debug("PLAYERS before emitting:", players);
 
