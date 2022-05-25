@@ -19,7 +19,6 @@ const handlePlayerJoined = function (username) {
 			id: this.id,
 			room: "game",
 			username: username,
-			currentPlayer: null,
 		};
 
 		this.join(playerOne.room);
@@ -33,7 +32,6 @@ const handlePlayerJoined = function (username) {
 			id: this.id,
 			room: "game",
 			username: username,
-			currentPlayer: null,
 		};
 
 		this.join(playerTwo.room);
@@ -41,15 +39,13 @@ const handlePlayerJoined = function (username) {
 		players.push(playerTwo);
 
 		// Randomizes which player that starts firing
-		// Player with "user" as currentPLayer always starts
+		// Player with true as myTurn always starts
 		const startingPlayer = players[Math.floor(Math.random() * players.length)];
-		startingPlayer.currentPlayer = "user";
+		startingPlayer.myTurn = true;
 
-		// Sets second player as "enemy" and never starts shooting
-		const secondPlayer = players.find(
-			(player) => player.currentPlayer !== "user"
-		);
-		secondPlayer.currentPlayer = "enemy";
+		// Sets second player as false and never starts shooting
+		const secondPlayer = players.find((player) => player.myTurn !== true);
+		secondPlayer.myTurn = false;
 
 		debug("PLAYERS before emitting:", players);
 
