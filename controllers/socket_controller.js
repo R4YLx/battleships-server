@@ -6,8 +6,6 @@ const debug = require("debug")("battleships:socket_controller");
 let io = null; // socket.io server instance
 
 let players = [];
-const playerOneShips = ["1", "2", "3", "4"];
-const playerTwoShips = ["91", "92", "93", "94"];
 
 /**
  * Handle a player joined
@@ -21,14 +19,12 @@ const handlePlayerJoined = function (username) {
 			id: this.id,
 			room: "game",
 			username: username,
-			currentPlayer: "",
 		};
 
 		this.join(playerOne.room);
 
 		players.push(playerOne);
 
-		// Sending oppponent name
 		io.to(playerOne.room).emit("players:profiles", players);
 	} else if (players.length <= 1) {
 		// creating player profile
@@ -44,7 +40,6 @@ const handlePlayerJoined = function (username) {
 
 		debug("PLAYERS before emitting:", players);
 
-		// Sending oppponent name
 		io.to(playerTwo.room).emit("players:profiles", players);
 	} else {
 		// if room is full
@@ -79,21 +74,17 @@ const handleDisconnect = function () {
  *
  */
 const handleShotFired = function (target) {
-	if (players[0].id === this.id) {
-		const hit = playerTwoShips.find((coord) => coord === target);
-		if (hit) {
-			this.broadcast.emit("player:hit", target);
-		} else {
-			this.broadcast.emit("player:miss", target);
-		}
-	} else {
-		const hit = playerOneShips.find((coord) => coord === target);
-		if (hit) {
-			this.broadcast.emit("player:hit", target);
-		} else {
-			this.broadcast.emit("player:miss", target);
-		}
-	}
+	console.log(`User shot at ${target}`);
+	this.broadcast.emit("player:fire", target);
+};
+
+/**
+ * Handle shot reply
+ *
+ */
+const handleShotReply = function (id, boolean) {
+	console.log(`Shot replied at ${id} and it's ${boolean}`);
+	this.broadcast.emit("player:shot-received", id, boolean);
 };
 
 /**
@@ -114,4 +105,7 @@ module.exports = function (socket, _io) {
 
 	// Handle shot fired
 	socket.on("player:shot-fired", handleShotFired);
+
+	// Handle shot replied
+	socket.on("player:shot-reply", handleShotReply);
 };
