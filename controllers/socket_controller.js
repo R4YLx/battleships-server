@@ -40,8 +40,16 @@ const handlePlayerJoined = function (username) {
 
 		players.push(playerTwo);
 
+		// Randomizes which player that starts firing
+		// Player with "user" as currentPLayer always starts
 		const startingPlayer = players[Math.floor(Math.random() * players.length)];
-		startingPlayer.currentPlayer = "first";
+		startingPlayer.currentPlayer = "user";
+
+		// Sets second player as "enemy" and never starts shooting
+		const secondPlayer = players.find(
+			(player) => player.currentPlayer !== "user"
+		);
+		secondPlayer.currentPlayer = "enemy";
 
 		debug("PLAYERS before emitting:", players);
 
