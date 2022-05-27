@@ -40,15 +40,6 @@ const handlePlayerJoined = function (username) {
 
 		players.push(playerTwo);
 
-		// Randomizes which player that starts firing
-		// Player with true as myTurn always starts
-		// const startingPlayer = players[Math.floor(Math.random() * players.length)];
-		// startingPlayer.myTurn = true;
-
-		// Sets second player as false and never starts shooting
-		// const secondPlayer = players.find((player) => player.myTurn !== true);
-		// secondPlayer.myTurn = false;
-
 		debug("PLAYERS before emitting:", players);
 
 		io.to(playerTwo.room).emit("players:profiles", players);
