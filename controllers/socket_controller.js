@@ -19,6 +19,7 @@ const handlePlayerJoined = function (username) {
 			id: this.id,
 			room: "game",
 			username: username,
+			turn: true,
 		};
 
 		this.join(playerOne.room);
@@ -32,11 +33,21 @@ const handlePlayerJoined = function (username) {
 			id: this.id,
 			room: "game",
 			username: username,
+			turn: false,
 		};
 
 		this.join(playerTwo.room);
 
 		players.push(playerTwo);
+
+		// Randomizes which player that starts firing
+		// Player with true as myTurn always starts
+		// const startingPlayer = players[Math.floor(Math.random() * players.length)];
+		// startingPlayer.myTurn = true;
+
+		// Sets second player as false and never starts shooting
+		// const secondPlayer = players.find((player) => player.myTurn !== true);
+		// secondPlayer.myTurn = false;
 
 		debug("PLAYERS before emitting:", players);
 
@@ -88,6 +99,14 @@ const handleShotReply = function (id, boolean) {
 };
 
 /**
+ * Handle shot reply
+ *
+ */
+const handleSunkenShip = function (id) {
+	this.broadcast.emit("player:ship-sunken-reply", id);
+};
+
+/**
  * Export controller and attach handlers to events
  *
  */
@@ -108,4 +127,7 @@ module.exports = function (socket, _io) {
 
 	// Handle shot replied
 	socket.on("player:shot-reply", handleShotReply);
+
+	// Handle enemy ship sunken
+	socket.on("player:ship-sunken", handleSunkenShip);
 };
