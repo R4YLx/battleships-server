@@ -6,6 +6,8 @@ const debug = require("debug")("battleships:socket_controller");
 let io = null; // socket.io server instance
 
 let players = [];
+let games = [];
+let game = 1;
 
 /**
  * Handle a player joined
@@ -17,41 +19,30 @@ const handlePlayerJoined = function (username) {
 	if (players.length === 0) {
 		const playerOne = {
 			id: this.id,
-			room: "game",
 			username: username,
 			turn: true,
 		};
-
-		this.join(playerOne.room);
-
 		players.push(playerOne);
-
-		io.to(playerOne.room).emit("players:profiles", players);
-	} else if (players.length <= 1) {
+		this.join(game);
+		io.to(game).emit("players:profiles", players);
+		debug(`${username} with id ${this.id} joined room ${game} `);
+	} else if (players.length === 1) {
 		// creating player profile
 		const playerTwo = {
 			id: this.id,
-			room: "game",
 			username: username,
 			turn: false,
 		};
-
-		this.join(playerTwo.room);
-
 		players.push(playerTwo);
-
-		debug("PLAYERS before emitting:", players);
-
-		io.to(playerTwo.room).emit("players:profiles", players);
-	} else {
-		// if room is full
-		this.emit("game:full", true, (playersArray) => {
-			playersArray = players;
-		});
-
-		delete this.id;
-		return;
+		this.join(game);
+		io.to(game).emit("players:profiles", players);
+		debug(`${username} with id ${this.id} joined room ${game} `);
 	}
+	if (players.length === 2) {
+		players = [];
+		game++;
+	}
+	games.push(game);
 };
 
 /**
