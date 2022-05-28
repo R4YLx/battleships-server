@@ -38,7 +38,7 @@ const handlePlayerJoined = function (username) {
 		io.to(game).emit("players:profiles", players);
 		debug(`${username} with id ${this.id} joined room ${game} `);
 	}
-	if (players.length === 2) {
+	if (players.length >= 2) {
 		players = [];
 		game++;
 	}
@@ -51,7 +51,6 @@ const handlePlayerJoined = function (username) {
  */
 const handleDisconnect = function () {
 	debug(`Client ${this.id} disconnected :(`);
-
 	const removePlayer = (id) => {
 		const removeIndex = players.findIndex((player) => player.id === id);
 
@@ -59,7 +58,7 @@ const handleDisconnect = function () {
 	};
 
 	const player = removePlayer(this.id);
-	if (player) io.to(player.room).emit("player:disconnected", true);
+	if (player) io.to(game).emit("player:disconnected", true);
 };
 
 /**
@@ -67,8 +66,8 @@ const handleDisconnect = function () {
  *
  */
 const handleShotFired = function (target) {
+	this.broadcast.to(game).emit("player:fire", target);
 	console.log(`User shot at ${target}`);
-	this.broadcast.emit("player:fire", target);
 };
 
 /**
@@ -77,7 +76,7 @@ const handleShotFired = function (target) {
  */
 const handleShotReply = function (id, boolean) {
 	console.log(`Shot replied at ${id} and it's ${boolean}`);
-	this.broadcast.emit("player:shot-received", id, boolean);
+	this.broadcast.to(game).emit("player:shot-received", id, boolean);
 };
 
 /**
@@ -85,7 +84,7 @@ const handleShotReply = function (id, boolean) {
  *
  */
 const handleSunkenShip = function (id) {
-	this.broadcast.emit("player:ship-sunken-reply", id);
+	this.broadcast.to(game).emit("player:ship-sunken-reply", id);
 };
 
 /**
