@@ -57,14 +57,14 @@ const handleDisconnect = function () {
 
 	// array-object-array-object-property
 
-	const findPlayer = (playerId) => {
+	const findPlayerbyId = (playerId) => {
 		games.forEach((game) => {
 			const test = game.players.find((player) => player.id == playerId);
 			console.log("This should be the same as dissconnected ", test.id);
 			return test.id;
 		});
 	};
-	findPlayer(this.id);
+	findPlayerbyId(this.id);
 
 	// console.log(
 	// 	"find game",
