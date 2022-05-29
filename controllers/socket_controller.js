@@ -31,7 +31,7 @@ const handlePlayerJoined = function (username) {
 	if (players.length > 1) {
 		let game = {
 			id: players[0].id,
-			players: players,
+			players,
 		};
 
 		games.push(game);
@@ -41,6 +41,7 @@ const handlePlayerJoined = function (username) {
 		io.to(game.id).emit("players:profiles", game.players);
 		players = [];
 	}
+	console.log("Games in joined", games);
 };
 
 /**
@@ -54,8 +55,14 @@ const handleDisconnect = function () {
 
 	// console.log(room);
 
-	console.log(players);
-	console.log(games);
+	console.log("Games", games);
+
+	console.log(games.find((game) => game.players.id.includes(this.id)));
+
+	// console.log(
+	// 	"find game",
+	// 	games.find((game) => game.players.includes(this.id))
+	// );
 
 	// const removePlayer = (id) => {
 	// 	const removeIndex = players.findIndex((player) => player.id === id);
@@ -72,6 +79,7 @@ const handleDisconnect = function () {
  *
  */
 const handleShotFired = function (target) {
+	console.log("Shot fired games", games);
 	// console.log(`User shot at ${target}`);
 	this.broadcast.emit("player:fire", target);
 };
@@ -81,6 +89,7 @@ const handleShotFired = function (target) {
  *
  */
 const handleShotReply = function (id, boolean) {
+	console.log("Shot reply", games);
 	// console.log(`Shot replied at ${id} and it's ${boolean}`);
 	this.broadcast.emit("player:shot-received", id, boolean);
 };
