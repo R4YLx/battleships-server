@@ -9,7 +9,8 @@ let players = [];
 let games = [];
 
 const getRoom = (playerId, games) => {
-	return games.find((game) => game.id.includes(playerId));
+	const room = games.find((game) => game.players.id.includes(playerId));
+	return room;
 };
 
 /**
@@ -27,25 +28,18 @@ const handlePlayerJoined = function (username) {
 
 	players.push(player);
 
-	console.log("games when ONE PLAYER has joined", games);
-
 	if (players.length > 1) {
 		let game = {
-			id: players[0].id + "####" + players[1].id,
+			id: players[0].id,
 			players: players,
 		};
 
 		games.push(game);
+
+		this.join(game.id);
+
+		io.to(game.id).emit("players:profiles", game.players);
 		players = [];
-
-		const room = getRoom(this.id, games);
-
-		this.join(room.id);
-
-		console.log("Room details", room);
-		console.log("ROOM ID", room.id);
-
-		io.to(room.id).emit("players:profiles", room.players);
 	}
 };
 
@@ -55,6 +49,13 @@ const handlePlayerJoined = function (username) {
  */
 const handleDisconnect = function () {
 	debug(`Client ${this.id} disconnected :(`);
+
+	// const room = getRoom(this.id, games);
+
+	// console.log(room);
+
+	console.log(players);
+	console.log(games);
 
 	// const removePlayer = (id) => {
 	// 	const removeIndex = players.findIndex((player) => player.id === id);
