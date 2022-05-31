@@ -50,7 +50,7 @@ Build the classic multiplayer game Battleship in a group of three while using ag
 To run the app you have to:
 
 1. Add an .env file containing:
-   "PORT=4000\_"
+   "_PORT=4000_"
 
 2. Open terminal and run:
 
