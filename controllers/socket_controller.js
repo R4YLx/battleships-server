@@ -8,11 +8,6 @@ let io = null; // socket.io server instance
 let players = [];
 let games = [];
 
-const getRoom = (playerId, games) => {
-	const room = games.find((game) => game.players.id.includes(playerId));
-	return room;
-};
-
 /**
  * Handle a player joined
  *
@@ -41,7 +36,7 @@ const handlePlayerJoined = function (username) {
 		io.to(game.id).emit("players:profiles", game.players);
 		players = [];
 	}
-	console.log("Games in joined", games);
+	console.log("Games when joined", games);
 };
 
 /**
@@ -50,35 +45,40 @@ const handlePlayerJoined = function (username) {
  */
 const handleDisconnect = function () {
 	debug(`Client ${this.id} disconnected :(`);
+	// finds game id for room where players are in
+	const game = games.find((game) => {
+		const playerInGame = game.players.some((player) => player.id === this.id);
 
-	// const room = getRoom(this.id, games);
+		if (playerInGame) return game;
+	});
 
-	// console.log(room);
+	if (game) {
+		// removes disconnecting player from "players"-array in "game"
+		const removePlayer = (id) => {
+			const removeIndex = game.players.findIndex((player) => player.id === id);
 
-	// array-object-array-object-property
+			if (removeIndex !== -1) return game.players.splice(removeIndex, 1)[0];
+		};
 
-	const findPlayerbyId = (playerId) => {
-		games.forEach((game) => {
-			const test = game.players.find((player) => player.id == playerId);
-			console.log("This should be the same as dissconnected ", test.id);
-			return test.id;
-		});
-	};
-	findPlayerbyId(this.id);
+		// removes "game" in "games"- array
+		const removeGameRoom = (id) => {
+			const removeGameIndex = games.findIndex(
+				(emptyGame) => emptyGame.id === id
+			);
 
-	// console.log(
-	// 	"find game",
-	// 	games.find((game) => game.players.includes(this.id))
-	// );
+			if (removeGameIndex !== -1) return games.splice(removeGameIndex, 1)[0];
+		};
 
-	// const removePlayer = (id) => {
-	// 	const removeIndex = players.findIndex((player) => player.id === id);
+		removePlayer(this.id);
 
-	// 	if (removeIndex !== -1) return players.splice(removeIndex, 1)[0];
-	// };
+		if (game.players.length === 0) {
+			removeGameRoom(game.id);
+		}
 
-	// const player = removePlayer(this.id);
-	// if (player) io.to(player.room).emit("player:disconnected", true);
+		io.to(game.id).emit("player:disconnected", true);
+	}
+
+	console.log("Games when disconnecting", games);
 };
 
 /**
@@ -86,9 +86,14 @@ const handleDisconnect = function () {
  *
  */
 const handleShotFired = function (target) {
-	console.log("Shot fired games", games);
-	// console.log(`User shot at ${target}`);
-	this.broadcast.emit("player:fire", target);
+	// finds game id for room where players are in
+	const game = games.find((game) => {
+		const playerInGame = game.players.some((player) => player.id === this.id);
+
+		if (playerInGame) return game;
+	});
+
+	io.broadcast.to(game.id).emit("player:fire", target);
 };
 
 /**
@@ -96,9 +101,14 @@ const handleShotFired = function (target) {
  *
  */
 const handleShotReply = function (id, boolean) {
-	console.log("Shot reply", games);
-	// console.log(`Shot replied at ${id} and it's ${boolean}`);
-	this.broadcast.emit("player:shot-received", id, boolean);
+	// finds game id for room where players are in
+	const game = games.find((game) => {
+		const playerInGame = game.players.some((player) => player.id === this.id);
+
+		if (playerInGame) return game;
+	});
+
+	io.broadcast.to(game.id).emit("player:shot-received", id, boolean);
 };
 
 /**
