@@ -93,7 +93,7 @@ const handleShotFired = function (target) {
 		if (playerInGame) return game;
 	});
 
-	io.broadcast.to(game.id).emit("player:fire", target);
+	io.to(game.id).emit("player:fire", target);
 };
 
 /**
@@ -108,7 +108,7 @@ const handleShotReply = function (id, boolean) {
 		if (playerInGame) return game;
 	});
 
-	io.broadcast.to(game.id).emit("player:shot-received", id, boolean);
+	io.to(game.id).emit("player:shot-received", id, boolean);
 };
 
 /**
