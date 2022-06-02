@@ -25,7 +25,7 @@ const handlePlayerJoined = function (username) {
 
 	if (players.length > 1) {
 		let game = {
-			id: players[0].id,
+			id: "game-" + players[0].id,
 			players,
 		};
 
@@ -35,6 +35,8 @@ const handlePlayerJoined = function (username) {
 
 		io.to(game.id).emit("players:profiles", game.players);
 		players = [];
+	} else {
+		this.join("game-" + this.id);
 	}
 	console.log("Games when joined", games);
 };
@@ -52,23 +54,21 @@ const handleDisconnect = function () {
 		if (playerInGame) return game;
 	});
 
+	// removes disconnecting player from "players"-array in "game"
+	const removePlayer = (id) => {
+		const removeIndex = game.players.findIndex((player) => player.id === id);
+
+		if (removeIndex !== -1) return game.players.splice(removeIndex, 1)[0];
+	};
+
+	// removes "game" in "games"- array
+	const removeGameRoom = (id) => {
+		const removeGameIndex = games.findIndex((emptyGame) => emptyGame.id === id);
+
+		if (removeGameIndex !== -1) return games.splice(removeGameIndex, 1)[0];
+	};
+
 	if (game) {
-		// removes disconnecting player from "players"-array in "game"
-		const removePlayer = (id) => {
-			const removeIndex = game.players.findIndex((player) => player.id === id);
-
-			if (removeIndex !== -1) return game.players.splice(removeIndex, 1)[0];
-		};
-
-		// removes "game" in "games"- array
-		const removeGameRoom = (id) => {
-			const removeGameIndex = games.findIndex(
-				(emptyGame) => emptyGame.id === id
-			);
-
-			if (removeGameIndex !== -1) return games.splice(removeGameIndex, 1)[0];
-		};
-
 		removePlayer(this.id);
 
 		if (game.players.length === 0) {
@@ -77,8 +77,6 @@ const handleDisconnect = function () {
 
 		io.to(game.id).emit("player:disconnected", true);
 	}
-
-	console.log("Games when disconnecting", games);
 };
 
 /**
@@ -93,7 +91,9 @@ const handleShotFired = function (target) {
 		if (playerInGame) return game;
 	});
 
-	io.to(game.id).emit("player:fire", target);
+	if (game) {
+		this.broadcast.to(game.id).emit("player:fire", target);
+	}
 };
 
 /**
@@ -108,7 +108,9 @@ const handleShotReply = function (id, boolean) {
 		if (playerInGame) return game;
 	});
 
-	io.to(game.id).emit("player:shot-received", id, boolean);
+	if (game) {
+		this.broadcast.to(game.id).emit("player:shot-received", id, boolean);
+	}
 };
 
 /**
