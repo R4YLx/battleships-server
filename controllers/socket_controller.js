@@ -6,6 +6,7 @@ const debug = require("debug")("battleships:socket_controller");
 let io = null; // socket.io server instance
 
 let players = [];
+let games = [];
 
 /**
  * Handle a player joined
@@ -14,44 +15,30 @@ let players = [];
 const handlePlayerJoined = function (username) {
 	debug(`${username} with id ${this.id} joined the game `);
 
-	if (players.length === 0) {
-		const playerOne = {
-			id: this.id,
-			room: "game",
-			username: username,
-			turn: true,
+	const player = {
+		id: this.id,
+		username: username,
+		turn: players[0] ? false : true,
+	};
+
+	players.push(player);
+
+	if (players.length > 1) {
+		let game = {
+			id: "game-" + players[0].id,
+			players,
 		};
 
-		this.join(playerOne.room);
+		games.push(game);
 
-		players.push(playerOne);
+		this.join(game.id);
 
-		io.to(playerOne.room).emit("players:profiles", players);
-	} else if (players.length <= 1) {
-		// creating player profile
-		const playerTwo = {
-			id: this.id,
-			room: "game",
-			username: username,
-			turn: false,
-		};
-
-		this.join(playerTwo.room);
-
-		players.push(playerTwo);
-
-		debug("PLAYERS before emitting:", players);
-
-		io.to(playerTwo.room).emit("players:profiles", players);
+		io.to(game.id).emit("players:profiles", game.players);
+		players = [];
 	} else {
-		// if room is full
-		this.emit("game:full", true, (playersArray) => {
-			playersArray = players;
-		});
-
-		delete this.id;
-		return;
+		this.join("game-" + this.id);
 	}
+	console.log("Games when joined", games);
 };
 
 /**
@@ -60,15 +47,36 @@ const handlePlayerJoined = function (username) {
  */
 const handleDisconnect = function () {
 	debug(`Client ${this.id} disconnected :(`);
+	// finds game id for room where players are in
+	const game = games.find((game) => {
+		const playerInGame = game.players.some((player) => player.id === this.id);
 
+		if (playerInGame) return game;
+	});
+
+	// removes disconnecting player from "players"-array in "game"
 	const removePlayer = (id) => {
-		const removeIndex = players.findIndex((player) => player.id === id);
+		const removeIndex = game.players.findIndex((player) => player.id === id);
 
-		if (removeIndex !== -1) return players.splice(removeIndex, 1)[0];
+		if (removeIndex !== -1) return game.players.splice(removeIndex, 1)[0];
 	};
 
-	const player = removePlayer(this.id);
-	if (player) io.to(player.room).emit("player:disconnected", true);
+	// removes "game" in "games"- array
+	const removeGameRoom = (id) => {
+		const removeGameIndex = games.findIndex((emptyGame) => emptyGame.id === id);
+
+		if (removeGameIndex !== -1) return games.splice(removeGameIndex, 1)[0];
+	};
+
+	if (game) {
+		removePlayer(this.id);
+
+		if (game.players.length === 0) {
+			removeGameRoom(game.id);
+		}
+
+		io.to(game.id).emit("player:disconnected", true);
+	}
 };
 
 /**
@@ -76,8 +84,16 @@ const handleDisconnect = function () {
  *
  */
 const handleShotFired = function (target) {
-	console.log(`User shot at ${target}`);
-	this.broadcast.emit("player:fire", target);
+	// finds game id for room where players are in
+	const game = games.find((game) => {
+		const playerInGame = game.players.some((player) => player.id === this.id);
+
+		if (playerInGame) return game;
+	});
+
+	if (game) {
+		this.broadcast.to(game.id).emit("player:fire", target);
+	}
 };
 
 /**
@@ -85,8 +101,16 @@ const handleShotFired = function (target) {
  *
  */
 const handleShotReply = function (id, boolean) {
-	console.log(`Shot replied at ${id} and it's ${boolean}`);
-	this.broadcast.emit("player:shot-received", id, boolean);
+	// finds game id for room where players are in
+	const game = games.find((game) => {
+		const playerInGame = game.players.some((player) => player.id === this.id);
+
+		if (playerInGame) return game;
+	});
+
+	if (game) {
+		this.broadcast.to(game.id).emit("player:shot-received", id, boolean);
+	}
 };
 
 /**
