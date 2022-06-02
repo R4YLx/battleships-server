@@ -118,7 +118,13 @@ const handleShotReply = function (id, boolean) {
  *
  */
 const handleSunkenShip = function (id) {
-	this.broadcast.emit("player:ship-sunken-reply", id);
+	const game = games.find((game) => {
+		const playerInGame = game.players.some((player) => player.id === this.id);
+
+		if (playerInGame) return game;
+	});
+
+	this.broadcast.to(game.id).emit("player:ship-sunken-reply", id);
 };
 
 /**
